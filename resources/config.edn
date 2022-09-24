@@ -1,0 +1,4 @@
+{:server/jetty {:handler #ig/ref :cheffy/app
+                :port    3100}
+ :cheffy/app   {:jdbc-url #ig/ref :db/postgres}
+ :db/postgres  {:jdbc "jdbc:postgres://kobabrdfmxnnmd:58609c6228019574b3251ae2926c88e21bc4ad201fa4e98cd510a5acc13af0ba@ec2-3-229-165-146.compute-1.amazonaws.com:5432/d9b69dvhucue9f"}}

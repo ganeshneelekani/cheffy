@@ -14,6 +14,10 @@
   [_ config]
   (merge config {:port (Integer/parseInt (env :port))}))
 
+(defmethod ig/prep-key :db/postgres
+  [_ config]
+  (merge config {:jdbc-url (env :jdbc-url)}))
+
 (defmethod ig/init-key :server/jetty
   [_ {:keys [handler port]}]
   (jetty/run-jetty handler {:port  port
