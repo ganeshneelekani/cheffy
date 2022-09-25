@@ -10,7 +10,7 @@
                  [environ "1.2.0"]
                  [metosin/reitit-ring "0.5.18"]
                  [seancorfield/next.jdbc "1.2.659"]
-                 [org.postgresql/postgresql "42.2.14"]
+                 [postgresql "9.3-1102.jdbc41"]
                  [clj-http "3.10.0"]
                  [ovotech/ring-jwt "1.3.0"]
                  [metosin/reitit-swagger "0.5.18"]

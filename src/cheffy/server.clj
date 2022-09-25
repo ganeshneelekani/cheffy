@@ -16,6 +16,7 @@
 
 (defmethod ig/prep-key :db/postgres
   [_ config]
+  (println "---config---"config)
   (merge config {:jdbc-url (env :jdbc-url)}))
 
 (defmethod ig/init-key :server/jetty
@@ -32,7 +33,7 @@
 (defmethod ig/init-key :db/postgres
   [_ config]
   (println " Configured db")
-  (:jdbc config))
+  (:jdbc-url config))
 
 (defmethod ig/halt-key! :server/jetty
   [_ jetty]
@@ -41,7 +42,6 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [config-file]
-  (println "---1---")
   (let [config (-> config-file slurp ig/read-string)]
     (-> config ig/prep ig/init)))
 

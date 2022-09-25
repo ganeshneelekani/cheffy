@@ -1,10 +1,10 @@
 (ns cheffy.router
   (:require [cheffy.recipe.routes :as recipe]
-            [reitit.ring :as ring]
-            [reitit.swagger :as swagger]
-            [reitit.swagger-ui :as swagger-ui]
             [muuntaja.core :as m]
-            [reitit.ring.middleware.muuntaja :as muuntaja]))
+            [reitit.ring :as ring]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]))
 
 
 (def router-config
