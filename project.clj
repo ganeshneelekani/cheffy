@@ -15,7 +15,8 @@
                  [ovotech/ring-jwt "1.3.0"]
                  [metosin/reitit-swagger "0.5.18"]
                  [metosin/reitit-swagger-ui "0.5.18"]
-                 [metosin/reitit "0.5.18"]]
+                 [metosin/reitit "0.5.18"]
+                 [camel-snake-kebab "0.4.1"]]
   :main ^:skip-aot cheffy.server
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

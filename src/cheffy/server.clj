@@ -1,14 +1,14 @@
 (ns cheffy.server
-  (:require [cheffy.router :as r]
-            [environ.core :refer [env]]
+  (:require [reitit.ring :as ring]
+            [ring.adapter.jetty :as jetty]
             [integrant.core :as ig]
-            [ring.adapter.jetty :as jetty])
-  (:gen-class))
+            [environ.core :refer [env]]
+            [cheffy.router :as router]
+            [next.jdbc :as jdbc]))
 
 (defn app
   [env]
-  (println "----EE----" env)
-  (r/routes env))
+  (router/routes env))
 
 (defmethod ig/prep-key :server/jetty
   [_ config]
@@ -16,31 +16,28 @@
 
 (defmethod ig/prep-key :db/postgres
   [_ config]
-  (println "---config---"config)
-  (merge config {:jdbc-url (env :jdbc-url)}))
+  (merge config {:jdbc-url (env :jdbc-database-url)}))
 
 (defmethod ig/init-key :server/jetty
   [_ {:keys [handler port]}]
-  (jetty/run-jetty handler {:port  port
-                            :join? false})
-  (println " Server running on port " port))
+  (println (str "\nServer running on port " port))
+  (jetty/run-jetty handler {:port port :join? false}))
 
 (defmethod ig/init-key :cheffy/app
   [_ config]
-  (println " Started app")
+  (println "\nStarted app")
   (app config))
 
 (defmethod ig/init-key :db/postgres
-  [_ config]
-  (println " Configured db")
-  (:jdbc-url config))
+  [_ {:keys [jdbc-url]}]
+  (println "\nConfigured db")
+  (jdbc/with-options jdbc-url jdbc/snake-kebab-opts))
 
 (defmethod ig/halt-key! :server/jetty
   [_ jetty]
   (.stop jetty))
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [config-file]
   (let [config (-> config-file slurp ig/read-string)]
     (-> config ig/prep ig/init)))
@@ -49,4 +46,3 @@
   (app {:request-method :get
         :uri            "/"})
   (-main))
-
