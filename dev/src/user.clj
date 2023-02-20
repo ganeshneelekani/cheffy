@@ -47,8 +47,6 @@
       :body
       (slurp))
   
-   (sql/update! db :recipe {:name "my-recipe"} {:recipe-id "a3dde84c-4a33-45aa-b0f3-4bf9ac997680"})
-
 
   
   (jdbc/execute! db ["SELECT * FROM recipe WHERE public = true"])
