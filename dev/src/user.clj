@@ -31,6 +31,14 @@
 
 (comment
   (go)
+  
+    (app {:request-method :get
+          :uri "/swagger.json"})
+  
+   (jdbc/execute! db ["SELECT * FROM recipe WHERE public = true"])
+  
+  (sql/find-by-keys db :recipe {:public true})
+  
   (coer/coerce!
    (rrouter/match-by-path router "/v1/recipes/1234")
    )

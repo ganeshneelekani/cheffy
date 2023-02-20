@@ -13,8 +13,9 @@
                  [clj-http "3.10.0"]
                  [ovotech/ring-jwt "1.3.0"]
                  [camel-snake-kebab "0.4.1"]
-                 [com.zaxxer/HikariCP "3.4.5"]]
-  :main ^:skip-aot cheffy.core
+                 [com.zaxxer/HikariCP "3.4.5"]
+                 [migratus "1.4.9"]]
+  :main ^:skip-aot cheffy.server
   :target-path "target/%s" 
   :profiles {:uberjar {:aot :all}
              :dev {:source-paths ["dev/src"] 
