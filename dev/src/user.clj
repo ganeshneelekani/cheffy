@@ -1,14 +1,13 @@
 (ns user
-  (:require [cheffy.server] 
-            [cheffy.config :as a] 
+  (:require [cheffy.config :as a]
+            [cheffy.server]
+            [integrant.repl :as ig-repl]
+            [integrant.repl.state :as state]
             [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
-            [reitit.core :as reitit]
-            [reitit.coercion :as coer]
-            [integrant.repl :as ig-repl]
-            ;;[reitit.core :as rrouter]
-            [integrant.repl.state :as state]
-            [reitit.coercion.spec :as rspec]))
+            [reitit.coercion]
+            [reitit.coercion.spec]
+            [reitit.core]))
 
 (ig-repl/set-prep!
  (fn []
@@ -22,50 +21,71 @@
 (def app (-> state/system :cheffy/app))
 (def db (-> state/system :db/postgres))
 
-(def router
-  (reitit.core/router
-   ["/v1/recipes/:recipe-id"
-    {:coercion rspec/coercion
-     :parameters {:path {:recipe-id int?}}}]
-   {:compile coer/compile-request-coercers}))
-
 (comment
   (go)
   
-    (app {:request-method :get
-          :uri "/swagger.json"})
+  (halt)
   
-   (jdbc/execute! db ["SELECT * FROM recipe WHERE public = true"])
+  (reset)
+  
+  (app {:request-method :get
+        :uri            "/swagger.json"})
+  
+  (app {:request-method :get
+        :uri            "/v1/recipes/1234-recipe"})
+  
+    (-> (app {:request-method :get
+              :uri "/v1/recipes/1234-recipe"})
+        :body
+        (slurp))
+
+  
+  (jdbc/execute! db ["SELECT * FROM recipe WHERE public = true"])
   
   (sql/find-by-keys db :recipe {:public true})
+
+  (time
+   (with-open [conn (jdbc/get-connection db)]
+     {:public (sql/find-by-keys conn :recipe {:public true})
+      :drafts (sql/find-by-keys conn :recipe {:public false
+                                              :uid    "auth0|5ef440986e8fbb001355fd9c"})}))
   
-  (coer/coerce!
-   (rrouter/match-by-path router "/v1/recipes/1234")
-   )
+  (with-open [conn (jdbc/get-connection db)]
+    (let [recipe-id   "a3dde84c-4a33-45aa-b0f3-4bf9ac997680"
+          [recipe]    (sql/find-by-keys conn :recipe {:recipe_id recipe-id})
+          steps       (sql/find-by-keys conn :step {:recipe_id recipe-id})
+          ingredeints (sql/find-by-keys conn :ingredient {:recipe_id recipe-id})]
+      (when (seq recipe)
+        (assoc recipe
+               :recipe/steps steps
+               :recipe/ingredients ingredeints)))) 
+  
+  
+
   (app {:request-method :get
-        :uri "/v1/recipes/1234"})
-  
-    (app {:request-method :get
-          :uri "/v1/recipes"})
+        :uri            "/v1/recipes/1234"})
   
   (app {:request-method :get
-        :uri "/"})
+        :uri            "/v1/recipes"})
   
-    (app {:request-method :post
-          :uri "/v1/recipes"
-          :body-params {:name "my recipe"
+  (app {:request-method :get
+        :uri            "/"})
+  
+  (app {:request-method :post
+        :uri            "/v1/recipes"
+        :body-params    {:name      "my recipe"
                          :prep-time 4
-                         :img "image-url"
-                         :public false}})
-  
-  (:require  '[clojure.pprint :refer [pprint]])
-  (rrouter/match-by-path router "/v1/recipes/1234-recipe")
+                         :img       "image-url"
+                         :public    false}}) 
+
+
+  (rrouter/match-by-path router "/v1/recipes/12
+                                 34-recipe")
   
   (jdbc/execute! db ["select * from recipe where public = true"])
 
   (sql/find-by-keys db :recipe {:public true})
-  (halt)
-  (reset)
+
   
   (reset-all)
   
