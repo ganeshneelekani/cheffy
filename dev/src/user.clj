@@ -87,9 +87,6 @@
                          :img       "image-url"
                          :public    false}}) 
 
-
-  (rrouter/match-by-path router "/v1/recipes/12
-                                 34-recipe")
   
   (jdbc/execute! db ["select * from recipe where public = true"])
 

@@ -1,11 +1,13 @@
 (ns cheffy.recipe.routes
   (:require [cheffy.recipe.handlers :as recipe]
-            [cheffy.responses :as responses]))
+            [cheffy.responses :as responses]
+            [cheffy.middleware :as mw]))
 
 (defn routes
   [env]
   (let [db (:jdbc-url env)]
-    ["/recipes" {:swagger {:tags ["recipes"]}}
+    ["/recipes" {:swagger {:tags ["recipes"]}
+                 :middleware [[mw/wrap-auth0]]}
      [""
       {:get  {:handler   (recipe/list-all-recipes db)
               :responses {200 {:body responses/recipes}}
@@ -21,12 +23,14 @@
                 :parameters {:path {:recipe-id string?}}
                 :responses  {200 {:body responses/recipe}}
                 :summary    "Retrieve recipe"}
-       :put    {:handler    (recipe/update-recipe! db)
+       :put    {:handler    (recipe/update-recipe! db) 
+                :middleware [[mw/wrap-recipe-owner db]]
                 :parameters {:path {:recipe-id string?}
                              :body {:name string? :prep-time int? :public boolean? :img string?}}
                 :responses  {204 {:body nil?}}
                 :summary    "Update recipe"}
        :delete {:handler    (recipe/delete-recipe! db)
+                :middleware [[mw/wrap-recipe-owner db]]
                 :parameters {:path {:recipe-id string?}}
                 :responses  {204 {:body nil?}}
                 :summary    "Delete recipe"}}]]))
