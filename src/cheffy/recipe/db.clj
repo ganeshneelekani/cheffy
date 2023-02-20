@@ -12,6 +12,11 @@
            :drafts drafts})
         {:public public}))))
 
+(defn insert-recipe!
+  [db recipe]
+  (sql/insert! db :recipe (assoc recipe :public false
+                                        :favorite-count 0)))
+
 (defn find-recipe-by-id
   [db recipe-id]
   (with-open [conn (jdbc/get-connection db)]
@@ -22,3 +27,15 @@
         (assoc recipe
                :recipe/steps steps
                :recipe/ingredients ingredeints)))))
+
+(defn update-recipe!
+  [db recipe]
+  (-> (sql/update! db :recipe recipe (select-keys recipe [:recipe-id]))
+      :next.jdbc/update-count
+      (pos?)))
+
+(defn delete-recipe!
+  [db recipe]
+  (-> (sql/delete! db :recipe recipe)
+      :next.jdbc/update-count
+      (pos?)))
