@@ -19,8 +19,7 @@
   ([method uri]
    (test-endpoint method uri nil))
   ([method uri opts]
-   (let [app     (-> state/system :cheffy/app)
-         
+   (let [app     (-> state/system :cheffy/app) 
          request (app (-> (mock/request method uri)
                           (cond-> (:auth opts) (mock/header :authorization (str "Bearer " @token))
                                   (:body opts) (mock/json-body (:body opts)))))]
