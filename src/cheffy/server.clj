@@ -13,7 +13,11 @@
 
 (defmethod ig/prep-key :server/jetty
   [_ config]
-  (merge config {:port (env :port)}))
+  config)
+
+(defmethod ig/prep-key :auth/auth0
+  [_ config]
+  (merge config {:client-secret (env :auth0-client-secret)}))
 
 (defmethod ig/init-key :server/jetty
   [_ {:keys [handler port]}]
@@ -29,6 +33,11 @@
   [_ {:keys [jdbc-url]}]
   (println "\nConfigured db")
   (jdbc/with-options jdbc-url jdbc/snake-kebab-opts))
+
+(defmethod ig/init-key :auth/auth0
+  [_ auth0]
+  (println "\nConfigured auth0")
+  auth0)
 
 (defmethod ig/halt-key! :server/jetty
   [_ jetty]

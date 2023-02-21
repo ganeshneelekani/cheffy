@@ -16,5 +16,7 @@
 (def config
   {:server/jetty {:handler (ig/ref :cheffy/app)
                   :port (or (System/getenv "PORT") 3000)}
-   :cheffy/app {:jdbc-url (ig/ref :db/postgres)}
-   :db/postgres {:jdbc-url db}})
+   :cheffy/app {:jdbc-url (ig/ref :db/postgres)
+                :auth0 (ig/ref :auth/auth0)}
+   :db/postgres {:jdbc-url db}
+   :auth/auth0 {:auth0-client-secret "-_MAVgoa-MuBxpmoKH8ft39t3dYsqPSsCl35HI8mmhRkZrtUsc9jpsUx_uyk4BYP"}})

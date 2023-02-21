@@ -3,7 +3,21 @@
             [cheffy.server :refer :all]
             [cheffy.test-system :as ts]))
 
-(use-fixtures :once ts/token-fixture)
+(defn recipe-fixture
+  [f]
+  (ts/create-auth0-test-user
+   {:connection "Username-Password-Authentication"
+    :email      "recipe-tests@cheffy.app"
+    :password   "s#m3R4nd0m-pass"})
+  (reset! ts/token (ts/get-test-token "recipe-tests@cheffy.app"))
+  (ts/test-endpoint :post "/v1/account" {:auth true})
+  (ts/test-endpoint :put "/v1/account" {:auth true})
+  (reset! ts/token (ts/get-test-token "recipe-tests@cheffy.app"))
+  (f)
+  (ts/test-endpoint :delete "/v1/account" {:auth true})
+  (reset! ts/token nil))
+
+(use-fixtures :once recipe-fixture)
 
 (def recipe-id (atom nil))
 
@@ -15,16 +29,6 @@
   {:img       "https://images.unsplash.com/photo-1547516508-4c1f9c7c4ec3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=3318&q=80"
    :prep-time 30
    :name      "My Test Recipe"})
-
-(def step
-  {:description "My Test Step"
-   :sort 1})
-
-(def ingredient
-  {:amount 2
-   :measure "30 grams"
-   :sort 1
-   :name "My test ingredient"})
 
 (def update-recipe
   (assoc recipe :public true))
@@ -63,7 +67,8 @@
 
   (testing "Create step"
     (let [{:keys [status body]} (ts/test-endpoint :post (str "/v1/recipes/" @recipe-id "/steps")
-                                                  {:auth true :body step})]
+                                                  {:auth true :body {:description "My Test Step"
+                                                                     :sort 1}})]
       (reset! step-id (:step-id body))
       (is (= status 201))))
 
@@ -81,7 +86,10 @@
 
   (testing "Create ingredient"
     (let [{:keys [status body]} (ts/test-endpoint :post (str "/v1/recipes/" @recipe-id "/ingredients")
-                                                  {:auth true :body ingredient})]
+                                                  {:auth true :body {:amount 2
+                                                                     :measure "30 grams"
+                                                                     :sort 1
+                                                                     :name "My test ingredient"}})]
       (reset! ingredient-id (:ingredient-id body))
       (is (= status 201))))
 
@@ -101,15 +109,10 @@
 
   (testing "Delete recipe"
     (let [{:keys [status]} (ts/test-endpoint :delete (str "/v1/recipes/" @recipe-id) {:auth true})]
-      (is (= status 204))))
-  
-  )
-;; => #'cheffy.recipes-tests/recipe-tests
-
-
+      (is (= status 204)))))
 
 (comment
 
-  (ts/test-endpoint :post "/v1/recipes" {:auth true :body recipe})
+  (ts/test-endpoint :get "/v1/recipes/50ae22fd-1a81-4cb8-8d4d-4e9646c14155" {:auth true})
   (ts/test-endpoint :post "/v1/recipes/2ebf903e-56a6-44d0-96da-aaabdaa56686/favorite" {:auth true})
   (ts/test-endpoint :delete "/v1/recipes/be49e960-f5da-4a2e-8375-448901401ce7" {:auth true}))
